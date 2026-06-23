@@ -1,0 +1,149 @@
+{
+  "name": "AI-Quote Coach",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "09b3555c-abdd-49f0-8b7a-a0f6e50b2f1e",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://zenquotes.io/api/random",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "193394ff-d0fc-4368-a679-2ec2c84044d8",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Quote: {{ $json.q }}\n\nAuthor: {{ $json.a }}\n\nGenerate the response in HTML format.\n\nInclude:\n- Meaning\n- Student Example\n- Today's Action\n- Motivation\n\nUse <h3>, <p>, and <ul> tags.\nDo not include <html> or <body> tags.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "b77d57d9-0ec4-4726-bb18-105cbad8174b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        288,
+        208
+      ],
+      "id": "225c41c2-009e-4bac-9d0c-a86256d2428a",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "TXyE320SSsgTmEyW",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "sreenandas88@gmail.com",
+        "subject": "=AI Quote Coach - {{ $now }}",
+        "message": "=<h1>AI Quote Coach</h1>\n\n<p><strong>Generated At:</strong> {{$now}}</p>\n\n<p><strong>Quote:</strong> \"{{ $node['HTTP Request'].json.q }}\"</p>\n\n<p><strong>Author:</strong> {{ $node['HTTP Request'].json.a }}</p>\n\n<hr>\n\n{{$json.output}}\n\n<hr>\n\n<p><em>Generated using n8n + Groq AI</em></p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "9cbdaa9d-d5e3-4139-adbc-d4f445e340f2",
+      "name": "Send a message",
+      "webhookId": "435350e8-15f2-4888-809f-e3db9045679a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6q0sEYu02hslbNM1",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "df3e8061-5793-43e3-addd-24bf60fa891f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f1bbfdaba0d6488328f61cb81d0c9ea15133e1fdcb72fe45e103bc802e42d6b0"
+  },
+  "nodeGroups": [],
+  "id": "4LFByJvSGezlGD0C",
+  "tags": []
+}
