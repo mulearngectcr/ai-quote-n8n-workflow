@@ -1,0 +1,197 @@
+{
+  "name": "Daily_Quotes",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c6272442-315b-4cbe-9a2c-a69e6f3b75c4",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://zenquotes.io/api/random",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "cc4b3826-92f2-478a-9eda-5a534321aba1",
+      "name": "HTTP Request",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an empathetic, insightful, and practical AI Coach mentoring students. \n\nYou will receive a quote and its author. Your task is to analyze it and output a highly structured, easy-to-read response. \n\nStrictly follow this layout and do not include any introductory or concluding conversational filler (e.g., do not say \"Here is your response\"). Start directly with \"Quote:\".\n\nFormat:\n\nQuote:\n {{ $json.q }} — {{ $json.a }}\n\nMeaning:\n[Explain the quote in 1-2 sentences using simple, jargon-free language]\n\nExample:\n[Provide a highly relatable, real-life scenario tailored specifically for a student]\n\nToday's Action:\n[Suggest one clear, actionable, and small step the student can take today inspired by the quote]\n\nMotivation:\n[End with a punchy, powerful, motivational one-liner]\n\n---\nInput Data:\nQuote: {{ $json.q }}\nAuthor: {{ $json.a }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "9836bcf7-c2ae-4d58-b677-2048334588c0",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SWSGGlOzIl5y4QPo",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "krsooraj465@gmail.com",
+        "toEmail": "krsooraj465@gmail.com",
+        "subject": "Your Daily Quote",
+        "html": "=<h3>Your Daily AI Quote Coach 🌱</h3>\n<p><i>Generated on: {{ $now.format('LLLL') }}</i></p>\n<hr>\n<p style=\"white-space: pre-line;\">{{ $json.content.parts[0].text }}</p>\n\nGenerated on: {{ $now.format('yyyy-MM-dd HH:mm') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1024,
+        -16
+      ],
+      "id": "df037f81-3af3-46fc-b7d5-99737bd91f17",
+      "name": "Send an Email",
+      "webhookId": "b9056def-8b04-47f5-9cdc-847d90aaf5ab",
+      "credentials": {
+        "smtp": {
+          "id": "ybPUlLwQmnbqOB9W",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5c5e68ef-7306-4d4d-aa27-f1eed1c8bed1",
+              "leftValue": "={{ $json.content.parts[0].text.length }}",
+              "rightValue": 40,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        768,
+        0
+      ],
+      "id": "436af487-2d93-4bd6-9d1b-4dfca110d7a1",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "055144e3-c186-4684-9ee7-d4b9386c89cd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "05b114f7d7e1721f430aae4cc28180f713e05fce93f7f905a4dcfc2213761d2b"
+  },
+  "nodeGroups": [],
+  "id": "SBbwLH61mR7OpqQW",
+  "tags": []
+}
