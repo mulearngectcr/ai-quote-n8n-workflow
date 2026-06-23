@@ -1,0 +1,151 @@
+{
+  "name": "n8n+ai",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8bba9af1-190e-466f-a9a8-148aacf2ac31",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://zenquotes.io/api/random",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "39dfff18-a3b2-4806-8474-a26f9714272a",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Given is a motivational quote and its author, along with an ISO timestamp:\n{{ $json.q }} ~ {{ $json.a }}, {{ $now }}\nGenerate an output of the following format, each section consisting of exactly one line:\n\nQuote: \n(State the quote and author)\nMeaning: \n(Explain the quote in simple language)\nExample:\n(Give a real-life example relevant to students)\nToday's Action: \n(Suggest one action item inspired by the quote)\nMotivation:\n(End with a motivational one-liner)\nGenerated at (time and date in Indian Standard Time)",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a51a186f-3c16-401a-863b-2f9e5f6acef4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        336,
+        208
+      ],
+      "id": "594fea5d-c5a1-4232-b6ce-3fada41d26b3",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "XaoENqK5O6EaLbrP",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "sidharthvjain@gmail.com",
+        "toEmail": "sidharthsgdrive@gmail.com",
+        "subject": "Quote of the Day",
+        "emailFormat": "text",
+        "text": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        768,
+        0
+      ],
+      "id": "e16c82ee-5c38-4130-b630-bca909c0d3c2",
+      "name": "Send an Email",
+      "webhookId": "6dca37f0-78d8-4398-a8d5-83335e932045",
+      "credentials": {
+        "smtp": {
+          "id": "HZRnBajyVfOnMloZ",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a9300371-4cb3-4d37-a49c-7641798dc928",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2f9cc00633ff2400a5fccc061871bb869794fc3d67d0abebaa7df07c1f61b213"
+  },
+  "nodeGroups": [],
+  "id": "DEvWMoFGoLMCggmY",
+  "tags": []
+}
