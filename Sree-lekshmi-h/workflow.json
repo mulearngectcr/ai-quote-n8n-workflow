@@ -1,0 +1,182 @@
+{
+  "name": "Quote generator",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 22,
+              "triggerAtMinute": 30
+            },
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4807e960-5b7e-4597-b528-8392d4780d70",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://zenquotes.io/api/random",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "df750d91-5f51-4013-b8ff-a2ddaa76ee77",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a personal growth coach.\n\nYour task is to analyze an inspirational quote and generate a response in the exact format below.\n\nQuote: {{ $json.q }}\nAuthor: {{ $json.a }}\n\nInstructions:\n1. Explain the quote in simple, easy-to-understand language.\n2. Give one real-life example relevant to students.\n3. Suggest one practical action the reader can take today.\n4. End with a short motivational one-liner.\n5. Keep the response concise and encouraging.\n6. Do not add any extra sections.\n\nOutput Format:\n\nQuote:\n\"<quote>\"\n\nAuthor:\n<author>\n\nMeaning:\n<simple explanation>\n\nExample:\n<student-related example>\n\nToday's Action:\n<one practical action>\n\nMotivation:\n<motivational one-liner>",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "68835906-38cc-478a-87ef-e880d9733d1f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-safeguard-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        320,
+        224
+      ],
+      "id": "647b5806-0188-4bb6-8bd8-3272d200f690",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "8DK5WmyMjvC5K3Qs",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "sreelekshmih4@gmail.com",
+        "subject": "=Quote of the Day",
+        "message": "={{ $json.html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        816,
+        16
+      ],
+      "id": "a5157833-d715-4996-bb69-09a1d2f27c2e",
+      "name": "Send a message",
+      "webhookId": "727d33f3-dd40-4928-aa94-9a25b1e3cdca",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "xLwL3MZdE6Pzrq80",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      html: $json.output.replace(/\\n\\n/g, \"<br><br>\")\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        176
+      ],
+      "id": "34ce64f6-23bd-4d53-9b08-3acc954f5af4",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f846654a-c838-4206-891b-4237efff70eb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e4e118cd0b21c5d6b272259d3a5047e4fbb4e501e42abd6ee9a03f18be7019f0"
+  },
+  "nodeGroups": [],
+  "id": "Vj5eKU97acP6fnws",
+  "tags": []
+}
