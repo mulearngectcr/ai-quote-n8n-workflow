@@ -1,0 +1,148 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        16
+      ],
+      "id": "fe08258d-6446-429a-9494-61ed9fd78901",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://zenquotes.io/api/random",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -48,
+        16
+      ],
+      "id": "8c6c99e1-b26e-456a-8c5c-063acc7fd67b",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Act as a motivational coach for university students. \n\nRead the following quote: \n\"{{ $json.q }}\"\nBy: {{ $json.a }}\n\nOutput your response strictly in the following format with no extra conversation:\n\nMeaning:\n[Explain the quote in simple language]\n\nExample:\n[Give a real-life example relevant to students]\n\nToday's Action:\n[Suggest one specific action item they can do right now]\n\nMotivation:\n[End with a motivational one-liner]",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        128,
+        16
+      ],
+      "id": "ee119897-161a-4a9c-9aff-da2fa30fa0da",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        64,
+        224
+      ],
+      "id": "0308f97e-f5bb-4b8f-9d14-72fd06295866",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "tK31z3b6oUJwrc81",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "athulpp2006@gmail.com",
+        "toEmail": "24b166.athul@gectcr.ac.in",
+        "subject": "=🚀 Daily Quote Coach \n {{ $now.setZone('Asia/Kolkata').toFormat('dd LLL yyyy') }}",
+        "html": "={{ $json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        448,
+        16
+      ],
+      "id": "1cf8ebeb-aade-43d8-909f-342514031768",
+      "name": "Send an Email",
+      "webhookId": "b3413a3f-3982-4ad6-9b50-00c35b90fd5b",
+      "credentials": {
+        "smtp": {
+          "id": "AaWsou7Z2r8DzdZG",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "c8edb35f-d305-437d-8ebf-d486c6bd9bcd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4c116f0452e51577b4b6c536a0b8a3371f0f3db8d75da256cc0f4e7f99a203e1"
+  },
+  "id": "OiSIrOmMPsoAcN9n",
+  "tags": []
+}
